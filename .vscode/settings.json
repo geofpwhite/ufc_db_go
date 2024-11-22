@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "C:\\Users\\geof\\Downloads\\Le Grof - Copy.db",
+            "name": "zomboid"
+        },
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "ufc.db",
+            "name": "ufc"
+        }
+    ]
+}
