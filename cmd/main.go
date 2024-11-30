@@ -1,7 +1,14 @@
 package main
 
-import "github.com/geofpwhite/ufc_db_go/pkg/database"
+import (
+	"os"
+	"time"
+
+	"github.com/geofpwhite/ufc_db_go/pkg/scraper"
+)
 
 func main() {
-	_ = database.Init()
+	s := scraper.NewScraper()
+	s.Scrape()
+	os.Rename("app.log", "logs/at"+time.Now().Local().String())
 }

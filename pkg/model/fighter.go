@@ -2,14 +2,15 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Fighter struct {
-	gorm.Model
 	ID         uint `gorm:"primarykey"`
-	Name       string
+	FirstName  string
+	LastName   string
+	NickName   *string
 	DOB        time.Time
+	Height     *int
+	Reach      *int
 	FightStats []FightStats `gorm:"foreignKey:FighterID;references:ID"`
 }

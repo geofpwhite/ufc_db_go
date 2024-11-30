@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"sync"
-	"time"
 
 	"github.com/geofpwhite/ufc_db_go/pkg/model"
 	"gorm.io/driver/sqlite"
@@ -28,10 +27,10 @@ func Init() *Database {
 	return &database
 }
 
-func (database *Database) GetFighterByName(name string) (*model.Fighter, error) {
+func (database *Database) GetFighterByFirstAndLastName(firstName, lastName string) (*model.Fighter, error) {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	fighter := model.Fighter{Name: name}
+	fighter := model.Fighter{FirstName: firstName, LastName: lastName}
 	var result []model.Fighter
 	ret := database.db.Where(&fighter).Find(&result)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
@@ -51,11 +50,19 @@ func (database *Database) GetFighterByID(id uint) (*model.Fighter, error) {
 	return &result, nil
 }
 
-func (database *Database) GetAllFightsBetween(f1, f2 model.FightStats) ([]model.Fight, error) {
+func (database *Database) GetAllFightsBetween(f1, f2 model.Fighter) ([]model.Fight, error) {
 	database.mut.Lock()
 	defer database.mut.Unlock()
 	var result []model.Fight
-	ret := database.db.Where(&model.Fight{Fighter1Stats: f1, Fighter2Stats: f2}).Find(&result)
+	ret := database.db.Where(&model.Fight{
+		Fighter1Stats: model.FightStats{
+			FighterID: f1.ID,
+		},
+		Fighter2Stats: model.FightStats{
+			FighterID: f2.ID,
+		},
+	}).Find(&result)
+	// ret := database.db.Exec(fmt.Sprintf("SELECT * FROM fights join fight_stats ON fights.id=fight_stats.fight_id where fighter_id=%d or fighter_id=%d", f1.ID, f2.ID))
 
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, ret.Error
@@ -63,17 +70,16 @@ func (database *Database) GetAllFightsBetween(f1, f2 model.FightStats) ([]model.
 	return result, nil
 }
 
-func (database *Database) CreateFighter(name string, dob time.Time) error {
+func (database *Database) CreateFighter(f model.Fighter) error {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	f := model.Fighter{Name: name, DOB: dob}
 	var result model.Fighter
 	ret := database.db.Where(&f).First(&result)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
-		return ret.Error
+		database.db.Save(&f)
+		return nil
 	}
-	database.db.Save(&f)
-	return nil
+	return ret.Error
 }
 
 func (database *Database) CreateFight(f1, f2 model.FightStats, event model.Event) error {
@@ -89,12 +95,11 @@ func (database *Database) CreateFight(f1, f2 model.FightStats, event model.Event
 	return nil
 }
 
-func (database *Database) CreateEvent(title string, date time.Time) error {
+func (database *Database) CreateEvent(e model.Event) error {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	e := model.Event{Title: title, Date: date}
-	var result model.Fighter
-	ret := database.db.Where(&e).Find(&result)
+	var result model.Event
+	ret := database.db.Where(&model.Event{Title: e.Title}).Find(&result)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return ret.Error
 	}
