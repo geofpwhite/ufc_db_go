@@ -82,16 +82,15 @@ func (database *Database) CreateFighter(f model.Fighter) error {
 	return ret.Error
 }
 
-func (database *Database) CreateFight(f1, f2 model.FightStats, event model.Event) error {
+func (database *Database) CreateFight(fight model.Fight) error {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	f := model.Fight{Fighter1Stats: f1, Fighter2Stats: f2, EventID: event.ID}
 	var result model.Fight
-	ret := database.db.Where(&f).First(&result)
+	ret := database.db.Where(&fight).First(&result)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return ret.Error
 	}
-	database.db.Save(&f)
+	database.db.Save(&fight)
 	return nil
 }
 
@@ -105,4 +104,15 @@ func (database *Database) CreateEvent(e model.Event) error {
 	}
 	database.db.Save(&e)
 	return nil
+}
+
+func (database *Database) GetEventByTitle(title string) (*model.Event, error) {
+	database.mut.Lock()
+	defer database.mut.Unlock()
+	var result model.Event
+	ret := database.db.Where(&model.Event{Title: title}).Find(&result)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, ret.Error
+	}
+	return &result, nil
 }
