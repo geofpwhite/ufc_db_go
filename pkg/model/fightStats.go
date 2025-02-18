@@ -14,4 +14,5 @@ type FightStats struct {
 	Weight             int
 	Outcome            string // either "WIND","LOSED","WINF","LOSEF","DRAW","WINNC","LOSENC","WINDQ","LOSEDQ"
 	FinalRound         int    // the round in which the fight ended, so either the final round of the fight or the round when one of them got finished
+	TimeLeft           int    // time left in final round in seconds
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/geofpwhite/ufc_db_go/pkg/model"
@@ -35,6 +36,9 @@ func (database *Database) GetFighterByFirstAndLastName(firstName, lastName strin
 	ret := database.db.Where(&fighter).Find(&result)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, ret.Error
+	}
+	if len(result) == 0 {
+		return nil, errors.New(fmt.Sprintf("no fighter found for %s %s", firstName, lastName))
 	}
 	return &result[0], nil
 }
