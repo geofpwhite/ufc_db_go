@@ -24,7 +24,7 @@ func Init() *Database {
 		db:  db,
 		mut: &sync.Mutex{},
 	}
-	database.db.AutoMigrate(new(model.FightStats), new(model.Fighter), new(model.Event), &model.Fight{})
+	database.db.AutoMigrate(new(model.FightStats), new(model.Fighter), new(model.Event), new(model.Fight), new(model.RoundStats))
 	return &database
 }
 
@@ -77,35 +77,21 @@ func (database *Database) GetAllFightsBetween(f1, f2 model.Fighter) ([]model.Fig
 func (database *Database) CreateFighter(f model.Fighter) error {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	var result model.Fighter
-	ret := database.db.Where(&f).First(&result)
-	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
-		database.db.Save(&f)
-		return nil
-	}
-	return ret.Error
+	database.db.Save(&f)
+	return nil
 }
 
 func (database *Database) CreateFight(fight model.Fight) error {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	var result model.Fight
-	ret := database.db.Where(&fight).First(&result)
-	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
-		return ret.Error
-	}
 	database.db.Save(&fight)
+	fmt.Println("saved fight")
 	return nil
 }
 
 func (database *Database) CreateEvent(e model.Event) error {
 	database.mut.Lock()
 	defer database.mut.Unlock()
-	var result model.Event
-	ret := database.db.Where(&model.Event{Title: e.Title}).Find(&result)
-	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
-		return ret.Error
-	}
 	database.db.Save(&e)
 	return nil
 }

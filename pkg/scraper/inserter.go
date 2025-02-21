@@ -1,6 +1,8 @@
 package scraper
 
 import (
+	"fmt"
+
 	"github.com/geofpwhite/ufc_db_go/pkg/database"
 	"github.com/geofpwhite/ufc_db_go/pkg/logger"
 	"github.com/geofpwhite/ufc_db_go/pkg/model"
@@ -32,7 +34,7 @@ func (i *Inserter) InsertFighters(fighterChannel <-chan model.Fighter) {
 
 func (i *Inserter) InsertFights(fightChannel <-chan model.Fight) {
 	for fight := range fightChannel {
+		fmt.Println("inserting fight")
 		i.db.CreateFight(fight)
-		logger.Logger.Printf("Inserted fight between")
 	}
 }
