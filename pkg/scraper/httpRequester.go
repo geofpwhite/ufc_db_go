@@ -132,7 +132,6 @@ func SendFighterResponses() <-chan model.Fighter {
 
 	c.OnHTML("a[href^='http://ufcstats.com/fighter-details']", func(e *colly.HTMLElement) {
 		url := e.Attr("href")
-		fmt.Println(e.Text)
 		if !visited[url] {
 			visited[url] = true
 			c2.Visit(url)
@@ -170,8 +169,7 @@ func SendFightResponses() <-chan model.Fight {
 		c2 := colly.NewCollector()
 		db := database.Init()
 		ctx := colly.NewContext()
-		visitedEvents, visitedFights := make(map[string]bool), make(map[string]bool)
-		fmt.Println(visitedFights)
+		visitedEvents := make(map[string]bool)
 		c2.OnHTML("i.b-fight-details__text-item_first", func(e *colly.HTMLElement) {
 			fields := strings.Fields(e.Text)
 			if fields[0] == "Method:" {
@@ -182,7 +180,6 @@ func SendFightResponses() <-chan model.Fight {
 			url := e.Attr("href")
 			text := strings.Trim(e.Text, " \n\r\t")
 			event, err := db.GetEventByTitle(text)
-			fmt.Println(event, err)
 			if err != nil {
 				panic(err)
 			}
@@ -191,11 +188,8 @@ func SendFightResponses() <-chan model.Fight {
 				c.Visit(url)
 			}
 			ctx.Put("event", event)
-			fmt.Println("event", event)
 		})
 		c.OnHTML("a[href^='http://ufcstats.com/fight-details']", func(e *colly.HTMLElement) {
-			event := ctx.GetAny("event").(*model.Event)
-			fmt.Println(event.Title)
 			c2.Visit(e.Attr("href"))
 		})
 
@@ -230,9 +224,10 @@ func SendFightResponses() <-chan model.Fight {
 			} else {
 				wname = wInfo[1:wnicknameIndex]
 			}
-			lnicknameIndex := slices.IndexFunc(lInfo, func(s string) bool {
-				return strings.Contains(s, "\"")
-			})
+			lnicknameIndex := slices.IndexFunc(lInfo,
+				func(s string) bool {
+					return strings.Contains(s, "\"")
+				})
 			if lnicknameIndex == -1 {
 				lname = lInfo[1:]
 			} else {
@@ -342,14 +337,14 @@ func SendFightResponses() <-chan model.Fight {
 			}
 			f.Fighter1Stats.FinalRound = finalRound
 			f.Fighter2Stats.FinalRound = finalRound
-			var kd1, kd2, sigstr1a,
-				sigstr2a,
-				sigstr1l,
+			var kd1, kd2, sigstr1l,
+				sigstr1a,
 				sigstr2l,
-				totalstr1a,
-				totalstr2a,
+				sigstr2a,
 				totalstr1l,
+				totalstr1a,
 				totalstr2l,
+				totalstr2a,
 				td1a,
 				td2a,
 				td1l,
@@ -360,7 +355,8 @@ func SendFightResponses() <-chan model.Fight {
 				_,
 				ctrl1,
 				ctrl2 int = nums[0], nums[1], nums[2], nums[3], nums[4], nums[5], nums[6], nums[7], nums[8], nums[9], nums[10], nums[11], nums[12], nums[13], nums[14], nums[15], nums[16], nums[17], nums[18], nums[19]
-
+			fmt.Println("total thrown", totalstr1a, "total landed", totalstr1l)
+			fmt.Println(nums, x)
 			switch r {
 			case "f":
 				f.Fighter1Stats.Knockdowns = kd1
